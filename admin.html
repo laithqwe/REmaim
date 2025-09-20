@@ -1,98 +1,85 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تقرير الريمين</title>
-<style>
-body { font-family:'Segoe UI', Tahoma, Geneva, Verdana,sans-serif; background:linear-gradient(135deg,#f5f7fa,#c3cfe2); margin:0; padding:20px;}
-.container { max-width:1100px; margin:auto; background:white; padding:30px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.1);}
-h2 { text-align:center; color:#333; margin-bottom:20px;}
-input, button { padding:10px; margin:5px; border-radius:8px; border:1px solid #ccc; font-size:16px;}
-button { border:none; background:#007bff; color:white; cursor:pointer; transition:0.3s;}
-button:hover { background:#0056b3;}
-table { width:100%; border-collapse:collapse; margin-top:20px;}
-th, td { border:1px solid #ccc; padding:10px; text-align:center;}
-th { background:#007bff; color:white;}
-tfoot td { font-weight:bold; background:#f1f1f1;}
-@media(max-width:768px){
-  table, thead, tbody, th, td, tr { display:block; }
-  th { display:none; }
-  td { text-align:right; padding-left:50%; position:relative; }
-  td::before { content: attr(data-label); position:absolute; left:10px; width:45%; font-weight:bold; text-align:left; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تقارير الريمين</title>
+  <style>
+    body { font-family: "Cairo", sans-serif; background: #f2f2f2; margin: 0; padding: 20px; }
+    h2 { text-align: center; margin-bottom: 20px; }
+    .filters { text-align: center; margin-bottom: 20px; }
+    input { padding: 8px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; background: #2196F3; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #1976D2; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    th { background: #4CAF50; color: white; }
+    #total { margin-top: 15px; font-weight: bold; text-align: center; }
+  </style>
 </head>
 <body>
-<div class="container">
-<h2>تقرير الريمين</h2>
-<div style="text-align:center;">
-<input type="date" id="from"> إلى <input type="date" id="to">
-<button onclick="fetchReport()">عرض التقرير</button>
-<button onclick="window.print()">طباعة التقرير</button>
-</div>
-<table id="reportTable">
-<thead>
-<tr>
-<th>اسم الممرضة</th>
-<th>الشفت</th>
-<th>التاريخ</th>
-<th>اسم المريض</th>
-<th>المبلغ</th>
-<th>الشركة</th>
-<th>الرقم</th>
-<th>سبب الريمين</th>
-</tr>
-</thead>
-<tbody></tbody>
-<tfoot>
-<tr>
-<td colspan="4">المجموع</td>
-<td id="total">0</td>
-<td colspan="3"></td>
-</tr>
-</tfoot>
-</table>
-</div>
+  <h2>تقارير الريمين</h2>
+  <div class="filters">
+    <label>من: <input type="date" id="fromDate"></label>
+    <label>إلى: <input type="date" id="toDate"></label>
+    <button onclick="loadReport()">عرض التقرير</button>
+    <button onclick="window.print()">🖨️ طباعة</button>
+  </div>
+  <table id="reportTable">
+    <thead>
+      <tr>
+        <th>اسم الممرضة</th>
+        <th>الشفت</th>
+        <th>التاريخ</th>
+        <th>اسم المريض</th>
+        <th>المبلغ</th>
+        <th>الشركة</th>
+        <th>الرقم</th>
+        <th>سبب الريمين</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <p id="total"></p>
 
-<script>
-const webAppUrl = "https://script.google.com/macros/s/AKfycbzOBsMwZits0tPbn2XnCnlZJY3Zcr-5uygxwfl-a1z3RyNHHOmzpGKAb_VNudooy2ge/exec";
+  <script>
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbzOBsMwZits0tPbn2XnCnlZJY3Zcr-5uygxwfl-a1z3RyNHHOmzpGKAb_VNudooy2ge/exec";
 
-async function fetchReport() {
-  const from = document.getElementById("from").value;
-  const to = document.getElementById("to").value;
-  let url = webAppUrl;
-  if(from && to) url += `?from=${from}&to=${to}`;
-  else if(from) url += `?from=${from}`;
+    async function loadReport() {
+      const fromDate = document.getElementById("fromDate").value;
+      const toDate = document.getElementById("toDate").value;
 
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    const tbody = document.querySelector("#reportTable tbody");
-    tbody.innerHTML = "";
-    let total = 0;
+      let url = `${webAppUrl}?action=get&from=${fromDate}&to=${toDate}`;
 
-    data.forEach(row => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td data-label="اسم الممرضة">${row.اسم_الممرضة||""}</td>
-        <td data-label="الشفت">${row.الشفت||""}</td>
-        <td data-label="التاريخ">${row.التاريخ||""}</td>
-        <td data-label="اسم المريض">${row.اسم_المريض||""}</td>
-        <td data-label="المبلغ">${row.المبلغ||""}</td>
-        <td data-label="الشركة">${row.الشركة||""}</td>
-        <td data-label="الرقم">${row.الرقم||""}</td>
-        <td data-label="سبب الريمين">${row.سبب_الريمن||""}</td>
-      `;
-      tbody.appendChild(tr);
-      total += parseFloat(row.المبلغ||0);
-    });
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
 
-    document.getElementById("total").textContent = total;
-  } catch(err) {
-    alert("فشل تحميل التقرير: "+err.message);
-  }
-}
-</script>
+        let rows = "";
+        let total = 0;
+
+        data.forEach(item => {
+          rows += `
+            <tr>
+              <td>${item["اسم الممرضة"]}</td>
+              <td>${item["الشفت"]}</td>
+              <td>${item["التاريخ"]}</td>
+              <td>${item["اسم المريض"]}</td>
+              <td>${item["المبلغ"]}</td>
+              <td>${item["الشركة"]}</td>
+              <td>${item["الرقم"]}</td>
+              <td>${item["سبب الريمين"]}</td>
+            </tr>`;
+          total += Number(item["المبلغ"]) || 0;
+        });
+
+        document.querySelector("#reportTable tbody").innerHTML = rows;
+        document.getElementById("total").innerText = `إجمالي المبالغ: ${total}`;
+      } catch (err) {
+        alert("⚠️ فشل الاتصال بالخادم");
+        console.error(err);
+      }
+    }
+  </script>
 </body>
 </html>
