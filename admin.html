@@ -46,6 +46,7 @@
     </div>
 
     <div id="report"></div>
+    <button class="print-btn" onclick="printReport()">طباعة التقرير</button>
   </div>
 </div>
 
@@ -55,7 +56,8 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby5VqWrFn4wcV-CBJnv
 async function fetchReport() {
   const date = document.getElementById('reportDate').value;
   const res = await fetch(`${WEB_APP_URL}?date=${date}`);
-  const data = await res.json();
+  const text = await res.text();
+  const data = JSON.parse(text);
   renderTable(data);
 }
 
@@ -63,7 +65,8 @@ async function fetchReportPeriod() {
   const from = document.getElementById('fromDate').value;
   const to = document.getElementById('toDate').value;
   const res = await fetch(`${WEB_APP_URL}?from=${from}&to=${to}`);
-  const data = await res.json();
+  const text = await res.text();
+  const data = JSON.parse(text);
   renderTable(data);
 }
 
@@ -81,6 +84,7 @@ function renderTable(data) {
     html += '</tr>';
     if(row['المبلغ']) total += parseFloat(row['المبلغ']);
   });
+
   html += `<tr><td colspan="${Object.keys(data[0]).length -1}" style="font-weight:bold; background:#e9ecef;">المجموع الكلي</td><td style="font-weight:bold; background:#e9ecef;">${total.toFixed(2)}</td></tr>`;
   html += '</table>';
   document.getElementById('report').innerHTML = html;
