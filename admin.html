@@ -51,13 +51,12 @@
 </div>
 
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby5VqWrFn4wcV-CBJnvg4GYa_CN2NqjVQu9oniRXSz3xW8SxWa2EFv1-NpJe-MPQMdVoA/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxr7I08WGEDvJgOePbKt3glaGc_WBrp-up3G0N-decXNrcxZToR7U4Mrwz2Y6G7S7OeiA/exec';
 
 async function fetchReport() {
   const date = document.getElementById('reportDate').value;
   const res = await fetch(`${WEB_APP_URL}?date=${date}`);
-  const text = await res.text();
-  const data = JSON.parse(text);
+  const data = await res.json();
   renderTable(data);
 }
 
@@ -65,8 +64,7 @@ async function fetchReportPeriod() {
   const from = document.getElementById('fromDate').value;
   const to = document.getElementById('toDate').value;
   const res = await fetch(`${WEB_APP_URL}?from=${from}&to=${to}`);
-  const text = await res.text();
-  const data = JSON.parse(text);
+  const data = await res.json();
   renderTable(data);
 }
 
