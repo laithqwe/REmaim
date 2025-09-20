@@ -46,36 +46,33 @@
 </div>
 
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby5VqWrFn4wcV-CBJnvg4GYa_CN2NqjVQu9oniRXSz3xW8SxWa2EFv1-NpJe-MPQMdVoA/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxr7I08WGEDvJgOePbKt3glaGc_WBrp-up3G0N-decXNrcxZToR7U4Mrwz2Y6G7S7OeiA/exec';
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('remForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const data = {
-      nurse: document.getElementById('nurse').value,
-      shift: document.getElementById('shift').value,
-      date: document.getElementById('date').value,
-      remin_desc: document.getElementById('remin_desc').value,
-      patient_name: document.getElementById('patient_name').value,
-      amount: document.getElementById('amount').value,
-      company: document.getElementById('company').value,
-      number: document.getElementById('number').value,
-      remin_reason: document.getElementById('remin_reason').value
-    };
-    try {
-      const res = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {'Content-Type': 'application/json'}
-      });
-      const result = await res.text(); // نستخدم text لأن Web App يعيد HTML
-      const json = JSON.parse(result);
-      alert(json.message);
-      document.getElementById('remForm').reset();
-    } catch(err) {
-      alert('فشل إرسال البيانات: ' + err.message);
-    }
-  });
+document.getElementById('remForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = {
+    nurse: document.getElementById('nurse').value,
+    shift: document.getElementById('shift').value,
+    date: document.getElementById('date').value,
+    remin_desc: document.getElementById('remin_desc').value,
+    patient_name: document.getElementById('patient_name').value,
+    amount: document.getElementById('amount').value,
+    company: document.getElementById('company').value,
+    number: document.getElementById('number').value,
+    remin_reason: document.getElementById('remin_reason').value
+  };
+  try {
+    const res = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    alert(result.message);
+    document.getElementById('remForm').reset();
+  } catch(err) {
+    alert('فشل إرسال البيانات: ' + err.message);
+  }
 });
 </script>
 
