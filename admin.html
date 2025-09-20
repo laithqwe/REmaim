@@ -1,85 +1,77 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تقارير الريمين</title>
-  <style>
-    body { font-family: "Cairo", sans-serif; background: #f2f2f2; margin: 0; padding: 20px; }
-    h2 { text-align: center; margin-bottom: 20px; }
-    .filters { text-align: center; margin-bottom: 20px; }
-    input { padding: 8px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
-    button { padding: 10px 20px; background: #2196F3; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #1976D2; }
-    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
-    th { background: #4CAF50; color: white; }
-    #total { margin-top: 15px; font-weight: bold; text-align: center; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير شيك ليست الريمين</title>
+<style>
+  body {font-family: Arial; margin:20px;background:#f5f5f5;}
+  table {width:100%;border-collapse:collapse;margin-top:20px;}
+  th, td {border:1px solid #ccc;padding:10px;text-align:center;}
+  th {background:#007bff;color:#fff;}
+  input, button {padding:10px;margin:5px;}
+  button {background:#28a745;color:#fff;border:none;border-radius:5px;cursor:pointer;}
+</style>
 </head>
 <body>
-  <h2>تقارير الريمين</h2>
-  <div class="filters">
-    <label>من: <input type="date" id="fromDate"></label>
-    <label>إلى: <input type="date" id="toDate"></label>
-    <button onclick="loadReport()">عرض التقرير</button>
-    <button onclick="window.print()">🖨️ طباعة</button>
-  </div>
-  <table id="reportTable">
-    <thead>
-      <tr>
-        <th>اسم الممرضة</th>
-        <th>الشفت</th>
-        <th>التاريخ</th>
-        <th>اسم المريض</th>
-        <th>المبلغ</th>
-        <th>الشركة</th>
-        <th>الرقم</th>
-        <th>سبب الريمين</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <p id="total"></p>
+<h2 style="text-align:center;">تقرير شيك ليست الريمين</h2>
 
-  <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbzOBsMwZits0tPbn2XnCnlZJY3Zcr-5uygxwfl-a1z3RyNHHOmzpGKAb_VNudooy2ge/exec";
+<label>من: <input type="date" id="from"></label>
+<label>إلى: <input type="date" id="to"></label>
+<button id="load">عرض التقرير</button>
+<button onclick="window.print()">طباعة</button>
 
-    async function loadReport() {
-      const fromDate = document.getElementById("fromDate").value;
-      const toDate = document.getElementById("toDate").value;
+<h3>إجمالي المبلغ: <span id="total">0</span></h3>
 
-      let url = `${webAppUrl}?action=get&from=${fromDate}&to=${toDate}`;
+<table id="reportTable">
+  <thead>
+    <tr>
+      <th>اسم الممرضة</th>
+      <th>الشفت</th>
+      <th>التاريخ</th>
+      <th>اسم المريض</th>
+      <th>المبلغ</th>
+      <th>الشركة</th>
+      <th>الرقم</th>
+      <th>سبب الريمين</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
+<script>
+const FORM_URL = "https://script.google.com/macros/s/AKfycbzOBsMwZits0tPbn2XnCnlZJY3Zcr-5uygxwfl-a1z3RyNHHOmzpGKAb_VNudooy2ge/exec";
 
-        let rows = "";
-        let total = 0;
-
-        data.forEach(item => {
-          rows += `
-            <tr>
-              <td>${item["اسم الممرضة"]}</td>
-              <td>${item["الشفت"]}</td>
-              <td>${item["التاريخ"]}</td>
-              <td>${item["اسم المريض"]}</td>
-              <td>${item["المبلغ"]}</td>
-              <td>${item["الشركة"]}</td>
-              <td>${item["الرقم"]}</td>
-              <td>${item["سبب الريمين"]}</td>
-            </tr>`;
-          total += Number(item["المبلغ"]) || 0;
-        });
-
-        document.querySelector("#reportTable tbody").innerHTML = rows;
-        document.getElementById("total").innerText = `إجمالي المبالغ: ${total}`;
-      } catch (err) {
-        alert("⚠️ فشل الاتصال بالخادم");
-        console.error(err);
-      }
-    }
-  </script>
+document.getElementById('load').addEventListener('click', async ()=>{
+  const from = document.getElementById('from').value;
+  const to = document.getElementById('to').value;
+  let url = FORM_URL;
+  if(from && to) url += `?from=${from}&to=${to}`;
+  
+  const res = await fetch(url);
+  const data = await res.json();
+  
+  const tbody = document.querySelector('#reportTable tbody');
+  tbody.innerHTML = '';
+  let total = 0;
+  
+  data.forEach(row=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${row['اسم الممرضة']}</td>
+      <td>${row['الشفت']}</td>
+      <td>${row['التاريخ']}</td>
+      <td>${row['اسم المريض']}</td>
+      <td>${row['المبلغ']}</td>
+      <td>${row['الشركة']}</td>
+      <td>${row['الرقم']}</td>
+      <td>${row['سبب الريمين']}</td>
+    `;
+    tbody.appendChild(tr);
+    total += Number(row['المبلغ']) || 0;
+  });
+  document.getElementById('total').textContent = total;
+});
+</script>
 </body>
 </html>
