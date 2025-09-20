@@ -42,6 +42,7 @@
 </form>
 
 <div class="report-link">
+  <a href="report.html" target="_blank">فتح صفحة التقارير</a>
 </div>
 
 <script>
@@ -64,10 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch(WEB_APP_URL, {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        headers: {'Content-Type': 'application/json'}
       });
-      const result = await res.json();
-      alert(result.message);
+      const result = await res.text(); // نستخدم text لأن Web App يعيد HTML
+      const json = JSON.parse(result);
+      alert(json.message);
       document.getElementById('remForm').reset();
     } catch(err) {
       alert('فشل إرسال البيانات: ' + err.message);
