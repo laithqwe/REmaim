@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير شيك ليست الريمين</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap');
+  body { font-family: 'Cairo', sans-serif; background: #f0f2f5; color: #333; padding: 20px; }
+  h2 { text-align: center; color: #007BFF; margin-bottom: 20px; }
+  .container { max-width: 1100px; margin: auto; }
+  .report-section { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+  .report-header { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+  .report-header input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+  .report-header button { padding: 12px 20px; border-radius: 8px; border: none; background: #007BFF; color: #fff; cursor: pointer; }
+  .report-header button:hover { background: #0056b3; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+  th, td { border: 1px solid #ddd; padding: 10px 8px; text-align: center; }
+  th { background: #007BFF; color: #fff; }
+  tr:nth-child(even) { background: #f9f9f9; }
+  tr:hover { background: #f1f7ff; }
+  @media (max-width: 768px) {
+    th, td { font-size: 12px; padding: 8px 6px; }
+    .report-header { flex-direction: column; }
+    .report-header button { width: 100%; }
+  }
+  button.print-btn { background: #28a745; margin-top: 15px; }
+  button.print-btn:hover { background: #1e7e34; }
+</style>
+</head>
+<body>
+
+<h2>تقرير شيك ليست الريمين</h2>
+
+<div class="container">
+  <div class="report-section">
+    <div class="report-header">
+      <input type="date" id="reportDate" placeholder="تقرير يومي">
+      <button onclick="fetchReport()">عرض التقرير</button>
+    </div>
+
+    <div class="report-header">
+      <input type="date" id="fromDate" placeholder="من">
+      <input type="date" id="toDate" placeholder="إلى">
+      <button onclick="fetchReportPeriod()">عرض التقرير للفترة</button>
+    </div>
+
+    <div id="report"></div>
+    <button class="print-btn" onclick="printReport()">طباعة التقرير</button>
+  </div>
+</div>
+
+<script>
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby5VqWrFn4wcV-CBJnvg4GYa_CN2NqjVQu9oniRXSz3xW8SxWa2EFv1-NpJe-MPQMdVoA/exec';
+
+async function fetchReport() {
+  const date = document.getElementById('reportDate').value;
+  const res = await fetch(`${WEB_APP_URL}?date=${date}`);
+  const data = await res.json();
+  renderTable(data);
+}
+
+async function fetchReportPeriod() {
+  const from = document.getElementById('fromDate').value;
+  const to = document.getElementById('toDate').value;
+  const res = await fetch(`${WEB_APP_URL}?from=${from}&to=${to}`);
+  const data = await res.json();
+  renderTable(data);
+}
+
+function renderTable(data) {
+  if (!data.length) { document.getElementById('report').innerHTML = '<p>لا توجد بيانات.</p>'; return; }
+
+  let total = 0;
+  let html = '<table><tr>';
+  Object.keys(data[0]).forEach(k => html += `<th>${k}</th>`);
+  html += '</tr>';
+
+  data.forEach(row => {
+    html += '<tr>';
+    Object.values(row).forEach(val => html += `<td>${val}</td>`);
+    html += '</tr>';
+    if(row['المبلغ']) total += parseFloat(row['المبلغ']);
+  });
+  html += `<tr><td colspan="${Object.keys(data[0]).length -1}" style="font-weight:bold; background:#e9ecef;">المجموع الكلي</td><td style="font-weight:bold; background:#e9ecef;">${total.toFixed(2)}</td></tr>`;
+  html += '</table>';
+  document.getElementById('report').innerHTML = html;
+}
+
+function printReport() {
+  const printContents = document.getElementById('report').innerHTML;
+  const w = window.open('', '', 'width=900,height=600');
+  w.document.write('<html><head><title>تقرير الريمين</title></head><body>');
+  w.document.write(printContents);
+  w.document.write('</body></html>');
+  w.document.close();
+  w.print();
+}
+</script>
+
+</body>
+</html>
